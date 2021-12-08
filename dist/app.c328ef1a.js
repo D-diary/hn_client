@@ -118,34 +118,40 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"app.js":[function(require,module,exports) {
-var container = document.getElementById('root');
-var ajax = new XMLHttpRequest();
-var content = document.createElement('div');
+// html 루트 반복을 줄이기 위해 상수화
+var container = document.getElementById('root'); // XMLHttpRequest가 반환하는 결과값을 ajax에 저장
+// XMLHttpRequset 객체는 서버로부터 XML 데이터를 전송받아 처리하는데 사용됨
+
+var ajax = new XMLHttpRequest(); // div만듬
+
+var content = document.createElement('div'); // 해커뉴스 api
+
 var NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 var CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
-ajax.open('GET', NEWS_URL, false);
-ajax.send();
-var newsFeed = JSON.parse(ajax.response);
+
+function getData(url) {
+  ajax.open('GET', url, false);
+  ajax.send();
+  return JSON.parse(ajax.response);
+} // ajax의 응답을 번역해서 newFeed에 넣음
+
+
+var newsFeed = getData(NEWS_URL);
 var ul = document.createElement('ul');
 window.addEventListener('hashchange', function () {
   var id = location.hash.substr(1);
-  ajax.open('GET', CONTENT_URL.replace('@id', id), false);
-  ajax.send();
-  var newsContent = JSON.parse(ajax.response);
+  var newsContent = getData(CONTENT_URL.replace('@id', id));
   var title = document.createElement('h1');
   title.innerHTML = newsContent.title;
   content.appendChild(title);
-  console.log(newsContent);
 });
 
 for (var i = 0; i < 10; i++) {
-  var li = document.createElement('li');
-  var a = document.createElement('a');
-  a.href = "#".concat(newsFeed[i].id);
-  a.innerHTML = "".concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")");
-  li.appendChild(a);
-  ul.appendChild(li);
-}
+  var div = document.createElement('div');
+  div.innerHTML = "\n    <li>\n      <a href=\"#".concat(newsFeed[i].id, "\">\n        ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n      </a>\n    </li>\n  ");
+  ul.appendChild(div.firstElementChild);
+} //HTML의 root 아래 ul과 div를 만듬
+
 
 container.appendChild(ul);
 container.appendChild(content);
