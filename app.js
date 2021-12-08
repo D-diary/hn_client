@@ -9,6 +9,7 @@ const content = document.createElement('div');
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 
+//ajax 중복되는 부분을 함수화함
 function getData(url) {
   ajax.open('GET', url, false);
   ajax.send();
@@ -16,35 +17,56 @@ function getData(url) {
   return JSON.parse(ajax.response);
 }
 
-// ajax의 응답을 번역해서 newFeed에 넣음
-const newsFeed = getData(NEWS_URL);
-const ul = document.createElement('ul');
+function newsFeed() {
+  const newsFeed = getData(NEWS_URL);
+  const newsList = [];
 
-window.addEventListener('hashchange', function() {
+  newsList.push('<ul>');
+  
+  
+  for(let i = 0; i < 10; i++) {
+    newsList.push(`
+      <li>
+        <a href="#${newsFeed[i].id}">
+          ${newsFeed[i].title} (${newsFeed[i].comments_count})
+        </a>
+      </li>
+    `);
+  }
+  //ul 닫기
+  newsList.push('</ul>');
+  // 하나로 합침 배열요소안에 있는 문자열들을 하나의 문자열로 합쳐서 반환
+  // 콤마라고 하는 문자열로 구분자를 넣어줌 
+  container.innerHTML = newsList.join('');
+}
+
+// ajax의 응답을 번역해서 newFeed에 넣음
+
+function newsDetail() {
   const id = location.hash.substr(1);
 
   const newsContent = getData(CONTENT_URL.replace('@id', id))
   const title = document.createElement('h1');
 
-  title.innerHTML = newsContent.title;
+  container.innerHTML = `
+  <h1>${newsContent.title}</h1>
 
-  content.appendChild(title);
-});
-
-for(let i = 0; i < 10; i++) {
-  const div = document.createElement('div');
-
-  div.innerHTML =  `
-    <li>
-      <a href="#${newsFeed[i].id}">
-        ${newsFeed[i].title} (${newsFeed[i].comments_count})
-      </a>
-    </li>
-  `;
-
-  ul.appendChild(div.firstElementChild);
+  <div>
+    <a href="#">목록으로</a>
+  </div>
+  `
 }
 
-//HTML의 root 아래 ul과 div를 만듬
-container.appendChild(ul);
-container.appendChild(content);
+function router() {
+  const routePath = location.hash;
+
+  if (routePath === '') {
+    newsFeed();
+  } else {
+    newsDetail();
+  }
+}
+
+window.addEventListener('hashchange', router);
+
+router();

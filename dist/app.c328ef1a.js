@@ -127,34 +127,50 @@ var ajax = new XMLHttpRequest(); // div만듬
 var content = document.createElement('div'); // 해커뉴스 api
 
 var NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
-var CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
+var CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json'; //ajax 중복되는 부분을 함수화함
 
 function getData(url) {
   ajax.open('GET', url, false);
   ajax.send();
   return JSON.parse(ajax.response);
+}
+
+function newsFeed() {
+  var newsFeed = getData(NEWS_URL);
+  var newsList = [];
+  newsList.push('<ul>');
+
+  for (var i = 0; i < 10; i++) {
+    newsList.push("\n      <li>\n        <a href=\"#".concat(newsFeed[i].id, "\">\n          ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n        </a>\n      </li>\n    "));
+  } //ul 닫기
+
+
+  newsList.push('</ul>'); // 하나로 합침 배열요소안에 있는 문자열들을 하나의 문자열로 합쳐서 반환
+  // 콤마라고 하는 문자열로 구분자를 넣어줌 
+
+  container.innerHTML = newsList.join('');
 } // ajax의 응답을 번역해서 newFeed에 넣음
 
 
-var newsFeed = getData(NEWS_URL);
-var ul = document.createElement('ul');
-window.addEventListener('hashchange', function () {
+function newsDetail() {
   var id = location.hash.substr(1);
   var newsContent = getData(CONTENT_URL.replace('@id', id));
   var title = document.createElement('h1');
-  title.innerHTML = newsContent.title;
-  content.appendChild(title);
-});
+  container.innerHTML = "\n  <h1>".concat(newsContent.title, "</h1>\n\n  <div>\n    <a href=\"#\">\uBAA9\uB85D\uC73C\uB85C</a>\n  </div>\n  ");
+}
 
-for (var i = 0; i < 10; i++) {
-  var div = document.createElement('div');
-  div.innerHTML = "\n    <li>\n      <a href=\"#".concat(newsFeed[i].id, "\">\n        ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n      </a>\n    </li>\n  ");
-  ul.appendChild(div.firstElementChild);
-} //HTML의 root 아래 ul과 div를 만듬
+function router() {
+  var routePath = location.hash;
 
+  if (routePath === '') {
+    newsFeed();
+  } else {
+    newsDetail();
+  }
+}
 
-container.appendChild(ul);
-container.appendChild(content);
+window.addEventListener('hashchange', router);
+router();
 },{}],"C:/Users/user/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
