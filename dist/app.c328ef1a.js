@@ -127,7 +127,10 @@ var ajax = new XMLHttpRequest(); // div만듬
 var content = document.createElement('div'); // 해커뉴스 api
 
 var NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
-var CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json'; //ajax 중복되는 부분을 함수화함
+var CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
+var store = {
+  currentPage: 1
+}; //ajax 중복되는 부분을 함수화함
 
 function getData(url) {
   ajax.open('GET', url, false);
@@ -140,12 +143,13 @@ function newsFeed() {
   var newsList = [];
   newsList.push('<ul>');
 
-  for (var i = 0; i < 10; i++) {
-    newsList.push("\n      <li>\n        <a href=\"#".concat(newsFeed[i].id, "\">\n          ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n        </a>\n      </li>\n    "));
+  for (var i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
+    newsList.push("\n      <li>\n        <a href=\"#/show/".concat(newsFeed[i].id, "\">\n          ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n        </a>\n      </li>\n    "));
   } //ul 닫기
 
 
-  newsList.push('</ul>'); // 하나로 합침 배열요소안에 있는 문자열들을 하나의 문자열로 합쳐서 반환
+  newsList.push('</ul>');
+  newsList.push("\n    <div>\n    <a href=\"#/page/".concat(store.currentPage > 1 ? store.currentPage - 1 : 1, "\">\uC774\uC804 \uD398\uC774\uC9C0</a>\n    <a href=\"#/page/").concat(store.currentPage + 1, "\">\uB2E4\uC74C \uD398\uC774\uC9C0</a>\n    </div>\n  ")); // 하나로 합침 배열요소안에 있는 문자열들을 하나의 문자열로 합쳐서 반환
   // 콤마라고 하는 문자열로 구분자를 넣어줌 
 
   container.innerHTML = newsList.join('');
@@ -153,16 +157,19 @@ function newsFeed() {
 
 
 function newsDetail() {
-  var id = location.hash.substr(1);
+  var id = location.hash.substr(7);
   var newsContent = getData(CONTENT_URL.replace('@id', id));
   var title = document.createElement('h1');
-  container.innerHTML = "\n  <h1>".concat(newsContent.title, "</h1>\n\n  <div>\n    <a href=\"#\">\uBAA9\uB85D\uC73C\uB85C</a>\n  </div>\n  ");
+  container.innerHTML = "\n  <h1>".concat(newsContent.title, "</h1>\n\n  <div>\n    <a href=\"#/page/").concat(store.currentPage, "\">\uBAA9\uB85D\uC73C\uB85C</a>\n  </div>\n  ");
 }
 
 function router() {
   var routePath = location.hash;
 
   if (routePath === '') {
+    newsFeed();
+  } else if (routePath.indexOf('#/page/') >= 0) {
+    store.currentPage = Number(routePath.substr(7));
     newsFeed();
   } else {
     newsDetail();
