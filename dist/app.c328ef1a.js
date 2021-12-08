@@ -118,8 +118,6 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"app.js":[function(require,module,exports) {
-function _readOnlyError(name) { throw new TypeError("\"" + name + "\" is read-only"); }
-
 // html 루트 반복을 줄이기 위해 상수화
 var container = document.getElementById('root'); // XMLHttpRequest가 반환하는 결과값을 ajax에 저장
 // XMLHttpRequset 객체는 서버로부터 XML 데이터를 전송받아 처리하는데 사용됨
@@ -150,12 +148,12 @@ function makeFeeds(feeds) {
 }
 
 function newsFeed() {
-  var newsFeed = getData(NEWS_URL);
+  var newsFeed = store.feeds;
   var newsList = [];
   var template = "\n    <div class=\"bg-gray-600 min-h-screen\">\n      <div class=\"bg-white text-xl\">\n        <div class=\"mx-auto px-4\">\n          <div class=\"flex justify-between items-center py-6\">\n            <div class=\"flex justify-start\">\n              <h1 class=\"font-extrabold\">Hacker News</h1>\n            </div>\n            <div class=\"items-center justify-end\">\n              <a href=\"#/page/{{__prev_page__}}\" class=\"text-gray-500\">\n                Previous\n              </a>\n              <a href=\"#/page/{{__next_page__}}\" class=\"text-gray-500 ml-4\">\n                Next\n              </a>\n            </div>\n          </div> \n        </div>\n      </div>\n      <div class=\"p-4 text-2xl text-gray-700\">\n        {{__news_feed__}}        \n      </div>\n    </div>\n  ";
 
   if (newsFeed.length === 0) {
-    store.feeds = makeFeeds(getData(NEWS_URL)), _readOnlyError("newsFeed");
+    newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
   }
 
   for (var i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {

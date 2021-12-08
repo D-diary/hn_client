@@ -31,7 +31,7 @@ function makeFeeds(feeds) {
 
 
 function newsFeed() {
-  const newsFeed = getData(NEWS_URL);
+  let newsFeed = store.feeds;
   const newsList = [];
   let template = `
     <div class="bg-gray-600 min-h-screen">
